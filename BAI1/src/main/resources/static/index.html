@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+
+    </style>
+</head>
+<body>
+
+<h2>Province</h2>
+<br>
+<form id="form-province">
+    <input type="text" id="idProvince" hidden>
+    Mã tỉnh <input type="text" id="maTinh" required>
+    <br>
+    Tên tỉnh <input type="text" id="tenTinh" required>
+    <br>
+    <button type="submit">Thêm tỉnh</button>
+    <button type="button" onclick="suaProvince()">Sửa tỉnh</button>
+</form>
+<br>
+<table border="1" id="table-tinh">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Mã Tỉnh</th>
+        <th>Tên Tỉnh</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div class="nav-buttons">
+    <button id="btnPrevProvince" onclick="loadTinh(currentPageProvince - 1)">Previous</button>
+    <button id="btnNextProvince" onclick="loadTinh(currentPageProvince + 1)">Next</button>
+</div>
+
+<h2>Ward</h2>
+<br>
+<form id="form-ward">
+    <input type="text" id="idWard" hidden>
+    Mã xã phường <input type="text" id="maPhuong" required>
+    <br>
+    Tên xã phường <input type="text" id="tenPhuong" required>
+    <br>
+    Tên tỉnh thành
+    <select id="select-province" required></select>
+    <br>
+    <button type="submit">Thêm xã phường</button>
+    <button type="button" onclick="suaWard()">Sửa xã phường</button>
+</form>
+<br>
+<table border="1" id="table-xa">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Mã xã phường</th>
+        <th>Tên xã phường</th>
+        <th>Tên tỉnh</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div class="nav-buttons">
+    <button id="btnPrevWard" onclick="loadXa(currentPageWard - 1)">Previous</button>
+    <button id="btnNextWard" onclick="loadXa(currentPageWard + 1)">Next</button>
+</div>
+
+<script>
+    let currentPageProvince = 1;  //khai báo biến toàn cục, trang bắt đầu của bảng province là trang 0 nhưng hiển thị là 1
+    let currentPageWard = 1; //trang bắt đầu của bảng ward là trang 0 nhưng hiển thị là 1
+    let pageSize = 5; //số lượng các phần tử trong trang là 5
+
+    async function loadTinh(page = 1) {
+        if (page < 1) page = 1; //nếu trang bé hơn 1 thì trang hiện tại vẫn là trang 1 để đảm bảo trang ko bao h bé hơn 1
+        currentPageProvince = page; //lưu trang hiện tại vào current
+
+        try {
+            //gửi 1 req với mapping như bên dưới sang controller, await để dừng vc thực thi các dòng
+            //bên dưới cho đến khi server trả về kq
+            const response = await fetch(`/api/province?page=${page}&size=${pageSize}`);
+            //chuyển dữ liệu thành định dạng json
+            const data = await response.json();
+
+            let rows = '';  //khai báo một biến rows và để trống để tí chứa dữ liệu
+            data.content.forEach(tinh => {  //nhận lấy danh sách mà controller trả về xog duyệt qua từng phân tử trong danh sách
+                //và gắn nó vào tinh r gọi ở dưới table
+                rows += `
+                <tr>
+                    <td>${tinh.id}</td>
+                    <td>${tinh.maTinhThanh}</td>
+                    <td>${tinh.tenTinhThanh}</td>
+                    <td>
+                        <button class="btn-xoa" onclick="xoaTinh(${tinh.id})">Xóa</button>
+                        <button onclick="xemProvince(${tinh.id})">Xem</button>
+                    </td>
+                </tr>`;
+            });
+            //chỉ định các nội dung trong biến rows này thuộc phần tbody của table-tinh
+            document.querySelector('#table-tinh tbody').innerHTML = rows;
+
+            // Cập nhật giao diện phân trang
+            document.getElementById('btnPrevProvince').disabled = data.first;
+            document.getElementById('btnNextProvince').disabled = data.last;
+
+        } catch (err) {
+            console.error("Lỗi load bảng Tỉnh:", err);
+        }
+    }
+
+    async function loadXa(page = 1) {
+        if (page < 1) page = 1;
+        currentPageWard = page;
+
+        try {
+            const response = await fetch(`/api/ward?page=${page}&size=${pageSize}`);
+            const data = await response.json();
+
+            let rows = '';
+            data.content.forEach(xa => {
+                rows += `
+                <tr>
+                    <td>${xa.id}</td>
+                    <td>${xa.maPhuong}</td>
+                    <td>${xa.tenPhuong}</td>
+                    <td>${xa.province ? xa.province.tenTinhThanh : 'Trống'}</td>
+                    <td>
+                        <button class="btn-xoa" onclick="xoaXa(${xa.id})">Xóa</button>
+                        <button onclick="xemWard(${xa.id})">Xem</button>
+                    </td>
+                </tr>`;
+            });
+            document.querySelector('#table-xa tbody').innerHTML = rows;
+
+            document.getElementById('btnPrevWard').disabled = data.first;
+            document.getElementById('btnNextWard').disabled = data.last;
+
+        } catch (err) {
+            console.error("Lỗi load bảng Xã:", err);
+        }
+    }
+
+        async function loadProvinceToSelect() {
+            try {
+                // Lấy size lớn (ví dụ 100) để đảm bảo hiện đủ tỉnh trong combobox
+                //gửi req sang controller vs mapping như dưới và định dạng json
+                const response = await fetch('/api/province?page=1&size=100');
+                const data = await response.json();
+
+                //tạo một biến khởi tạo là biến rỗng để tí chọn
+                let options = '<option value="">-- Chọn tỉnh --</option>';
+
+                //lấy danh sách tất cả các tỉnh và duyệt qua từng dữ liệu sau đó lưu vào tinh và tí gọi trong option để hiện thị
+                //tất cả
+                data.content.forEach(tinh => {
+                    options += `<option value="${tinh.id}">${tinh.tenTinhThanh}</option>`;
+                });
+
+                //chỉ định hiển thị dữ liệu trong cbb kia
+                document.getElementById('select-province').innerHTML = options;
+            } catch (err) {
+                console.error("Lỗi load combobox:", err);
+            }
+        }
+
+    //--------------------------------------------------------------------------------------------------
+
+    async function xoaTinh(id) {
+            //gửi về controller 1 req vs mapping như dưới kèm id và method delete và controller sẽ tìm xm có hàm nào
+            //nvay ko, nếu có thì thực hiện
+            await fetch('/api/province/delete/' + id, { method: 'DELETE' });
+            // Load lại cả 2 bảng để thấy hiệu ứng Cascade Delete
+
+            //sau đó chạy lại các hàm này để cập nhật trang
+            loadTinh();
+            loadXa();
+            loadProvinceToSelect();
+    }
+
+    async function xoaXa(id) {
+            //như cái trên
+            await fetch('/api/ward/delete/' + id, { method: 'DELETE' });
+            loadXa();
+    }
+
+    //--------------------------------------------------------------------------------------------------
+
+    //tìm đúng tên của form có id là form-province, sau đó luôn túc trực để khi người dùng ấn nút trong form có type submit
+    //thì sẽ ngay lập tức hành động, async giúp dùng await fetch bên dưới
+    document.getElementById("form-province").addEventListener('submit', async (e) => {
+        e.preventDefault(); //chặn load lại trang để có thể chạy fetch bên dưới
+
+        const obj = { //khai báo 1 object để chứa các dữ liệu trong form
+            maTinhThanh: document.getElementById("maTinh").value,  //viết tên key giống vs bên model và document.getElementById để tìm đến chính xác ô input có id tên như vậy
+            tenTinhThanh: document.getElementById("tenTinh").value,
+        };
+
+        //gửi req sang controller vs mapping như dưới và method post
+        await fetch('/api/province/add', {  //chạy mapping này bên controller
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}, //thông báo là gửi kiểu JSON nên phải dùng đúng thư viện để đọc
+            body: JSON.stringify(obj) //chuyển dữ liệu thành dạng json để gửi đi
+        });
+        e.target.reset(); // Xóa sạch form sau khi thêm
+        loadTinh();  //chạy lại hàm loadTinh để lấy danh sách mới nhất
+    });
+
+    //tìm đúng tên của form có id là form-ward, sau đó luôn túc trực để khi người dùng ấn nút trong form có type submit
+    //thì sẽ ngay lập tức hành động, async giúp dùng await fetch bên dưới
+    document.getElementById("form-ward").addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        //khai báo 1 object để chứa các dữ liệu trong form
+        const obj = {
+            maPhuong: document.getElementById("maPhuong").value, //viết tên key giống vs bên model và document.getElementById để tìm đến chính xác ô input có id tên như vậy
+            tenPhuong: document.getElementById("tenPhuong").value,
+            province: {id: document.getElementById("select-province").value}
+        };
+
+        //gửi req sang controller vs mapping như dưới và method post
+        await fetch('/api/ward/add', {
+           method: 'POST',
+            headers: {'Content-Type': 'application/json'}, //thông báo là gửi kiểu JSON nên phải dùng đúng thư viện để đọc
+            body: JSON.stringify(obj) //chuyển dữ liệu thành dạng json để gửi đi
+        });
+        e.target.reset(); // Xóa sạch form sau khi thêm
+        loadXa();
+    });
+
+    //--------------------------------------------------------------------------------------------------
+
+
+        async function xemProvince(id){
+        try {
+            //gửi req về controller kèm mapping và id của dòng đc chọn
+            const resp = await fetch('/api/province/detail/' + id);   //dùng detail bên controller để tìm tỉnh cần load lên form dựa vào id
+            const prov = await resp.json();  //chuyển dữ liệu của dòng đc chọn thành json
+
+            //điều dữ liệu của dòng đc chọn lên form
+            //hiển thị dữ liệu của dòng đc chọn lên form, cái trong document.getElementById là tên của các ô input
+            document.getElementById("idProvince").value = prov.id;
+            document.getElementById("maTinh").value = prov.maTinhThanh;
+            document.getElementById("tenTinh").value = prov.tenTinhThanh;
+        }catch (err){
+            console.error("Lỗi ko load đc", err);
+        }
+    }
+
+        async function xemWard(id){
+            try {
+                const resp = await fetch('/api/ward/detail/' + id);   //dùng detail bên controller để tìm tỉnh cần load lên form dựa vào id
+                const ward = await resp.json();  //có phải là sau khi tìm đc thì chuyển thành dạng json ko
+
+                //điều dữ liệu của dòng đc chọn lên form
+                document.getElementById("idWard").value = ward.id;
+                document.getElementById("maPhuong").value = ward.maPhuong;
+                document.getElementById("tenPhuong").value = ward.tenPhuong;
+                document.getElementById("select-province").value = ward.province ? ward.province.id : "";
+            }catch (err){
+                console.error("Lỗi ko load đc", err);
+            }
+        }
+
+
+    //--------------------------------------------------------------------------------------------------
+
+
+    async function suaProvince(){
+        //khai báo 1 biến obj trog đó có các ô input và nó có dữ liệu bên trong
+        //thế thì là khai báo 1 biến obj trog đó có dữ liệu trog các ô input
+        const obj = {
+            id: document.getElementById("idProvince").value,
+            maTinhThanh: document.getElementById("maTinh").value,  //viết tên key giống vs bên model và document.getElementById để tìm đến chính xác ô input có id tên như vậy
+            tenTinhThanh: document.getElementById("tenTinh").value,
+        }
+
+        //sau đó gửi dữ liệu trog biến obj đó sang controller kèm mapping và method
+        await fetch('/api/province/update', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(obj)
+        });
+
+        //sau khi làm xog thì cập nhật lại bằng cách chạy lại các hàm
+        loadTinh();
+        loadXa();  //để khi cập nhật tỉnh thì bảng xã cũng đc cập nhật
+
+        document.getElementById("form-province").reset();  //reset lại form
+        document.getElementById("idProvince").value = ""; //để cho ô input id bị trống để có thể thêm nếu cần
+    }
+
+        async function suaWard(){
+            //khai báo 1 biến obj trog đó có các ô input và nó có dữ liệu bên trong
+            //thế thì là khai báo 1 biến obj trog đó có dữ liệu trog các ô input
+            const obj = {
+                //viết tên key giống vs bên model và document.getElementById để tìm đến chính xác ô input có id tên như vậy
+                id: document.getElementById("idWard").value,
+                maPhuong: document.getElementById("maPhuong").value,
+                tenPhuong: document.getElementById("tenPhuong").value,
+                province: {id: document.getElementById("select-province").value}
+            }
+
+            //sau đó gửi dữ liệu trog biến obj đó sang controller kèm mapping và method
+            await fetch('/api/ward/update', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(obj)
+            });
+
+            //sau khi làm xog thì cập nhật lại bằng cách chạy lại các hàm
+            loadXa();
+            document.getElementById("form-ward").reset(); //reset lại form
+            document.getElementById("idWard").value = ""; //để cho ô input id bị trống để có thể thêm nếu cần
+        }
+
+
+        //mặc định khi mở lên là chạy mấy hàm này
+    window.onload = function() {
+        loadTinh();
+        loadXa();
+        loadProvinceToSelect();
+    }
+
+</script>
+</body>
+</html>
