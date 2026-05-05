@@ -55,22 +55,56 @@ public class Bai1Controller {
     }
 
     @PostMapping("/province/add")
-    public void AddProvince(@RequestBody Province province){
-        service.addProvince(province);
+    public ResponseEntity<String> AddProvince(@RequestBody Province province){
+        try {
+            service.addProvince(province);
+            return ResponseEntity.ok("Thêm thành công");
+        }catch (RuntimeException e){
+            //nhận lấy cái thông báo lỗi bên service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/ward/add")
-    public void AddWard(@RequestBody Ward ward){
-        service.addWard(ward);
+    public ResponseEntity<String> AddWard(@RequestBody Ward ward){
+        try {
+            service.addWard(ward);
+            return ResponseEntity.ok("Thêm thành công");
+        }catch (RuntimeException e){
+            //nhận lấy cái thông báo lỗi bên service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/province/update")
-    public void UpdateProvince(@RequestBody Province province){
-        service.updateProvince(province);
+    public ResponseEntity<String> UpdateProvince(@RequestBody Province province){
+        try {
+            service.updateProvince(province);
+            return ResponseEntity.ok("Sửa thành công");
+        }catch (RuntimeException e){
+            //nhận lấy cái thông báo lỗi bên service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/ward/update")
-    public void UpdateWard(@RequestBody Ward ward){
-        service.updateWard(ward);
+    public ResponseEntity<String> UpdateWard(@RequestBody Ward ward){
+        try {
+            service.updateWard(ward);
+            return ResponseEntity.ok("Sửa thành công");
+        }catch (RuntimeException e){
+            //nhận lấy cái thông báo lỗi bên service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/province/soft-delete")
+    public List<Province> getAllDeleteProvince(){
+        return service.getAllDeleteProvince();
+    }
+
+    @GetMapping("/ward/soft-delete")
+    public List<Ward> getAllDeleteWard(){
+        return service.getAllDeleteWard();
     }
 }

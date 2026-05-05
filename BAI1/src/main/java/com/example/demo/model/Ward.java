@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +29,17 @@ public class Ward {
     @Column(name = "tenPhuong")
     private String tenPhuong;
 
+    @Column(name = "trangThai")
+    private Boolean trangThai;
+
+    @Column(name = "ngayXoa")
+    private LocalDateTime ngayXoa;
+
     @ManyToOne
     @JoinColumn(name = "id_province", referencedColumnName = "id")
     private Province province;
+
+    //transient chỉ lưu trên ram, tắt prj là mất
+    @Transient
+    private String tenWard = "ward";
 }
