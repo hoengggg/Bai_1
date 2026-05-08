@@ -257,6 +257,7 @@
             alert("Thêm thành công");
             e.target.reset(); // Xóa sạch form sau khi thêm
             loadTinh();  //chạy lại hàm loadTinh để lấy danh sách mới nhất
+            loadProvinceToSelect(); //chạy lại hàm này để cập nhật cbb khi thêm tỉnh mới
         }else{
             //khai báo một cái biến error ở đây để lấy thông báo lỗi từ controller và lưu vào đó để tí gọi dưới alert
             const error = await resp.text();

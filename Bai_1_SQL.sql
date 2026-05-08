@@ -4,8 +4,11 @@ GO
 USE geography
 GO
 
-drop database geography
-go
+--USE master
+--GO
+
+--drop database geography
+--go
 
 CREATE TABLE province(
 	id INT PRIMARY KEY IDENTITY(1,1),
@@ -68,5 +71,4 @@ INSERT INTO ward (maPhuong, tenPhuong, id_province, trangThai, ngayXoa) VALUES
 ('P_BA_DINH_TH', N'Ph??ng Ba ?ình', 8, 1, NULL),
 ('P_QUANG_TRUNG_NA', N'Ph??ng Quang Trung', 9, 1, NULL),
 ('P_HONG_GAI', N'Ph??ng H?ng Gai', 10, 1, NULL);
-
 select * from ward
