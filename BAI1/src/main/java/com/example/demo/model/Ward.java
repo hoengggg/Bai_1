@@ -35,6 +35,16 @@ public class Ward {
     @Column(name = "ngayXoa")
     private LocalDateTime ngayXoa;
 
+//    {
+//        "id": 1,
+//            "tenPhuong": "Phường A",
+//            "province": {
+//        "id": 10,
+//                "tenTinhThanh": "Thái Bình",
+//                "trangThai": true
+//    }
+//    }
+
     @ManyToOne
     @JoinColumn(name = "id_province", referencedColumnName = "id")
     private Province province;

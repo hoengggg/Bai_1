@@ -159,6 +159,8 @@
             data.content.forEach(xa => {
 
                 let hienThiTen = '';
+                //nếu có trường tenProvinceDelete thì tức là tỉnh đã bị xóa và sẽ đưa cái tenProvinceDelete vào hienThiTen
+                //còn nếu ko có tenProvinceDelete thì lấy tên tỉnh bthg
                 if(xa.province){
                     hienThiTen = xa.province.tenProvinceDelete ? xa.province.tenProvinceDelete : xa.province.tenTinhThanh
                 }

@@ -78,6 +78,13 @@ public class Bai1Service {
     public Ward detailWard(int id){
         Ward ward =  repoWard.findById(id).orElse(null);
 
+        //ở bên này nó sẽ hoạt dộng như này, sau khi tìm thấy xã phường cần xem rồi nó sẽ kiểm tra xem != null ko, nếu có tức là
+        //đã tìm thấy thì kiểm tra tiếp, nó sẽ lấy trạng thái và và kiểm tra có khác true ko, nếu có thì sẽ gắn nội dung
+        //kia vào cái tenProvinceDelete ở model Province
+        //rồi sang index.html nó sẽ kiểm tra tiếp, sử dụng toán tử 3 ngôi để kiểm tra, nếu tenProvinceDelete != null
+        //tức là tỉnh có nội dung ở dưới bên trong thì sẽ lưu tenProvinceDelete vào hienThiTen (tỉnh = false)
+        //còn nếu tenProvinceDelete == null tức là tỉnh đó true và dữ liệu bên dưới ko đc gắn vào tenProvinceDelete
+        //thì toán tử 3 ngôi bên index.html sẽ kiểm tra và lấy bỏ tenTinhThanh vào trong hienThiTen
         if(ward != null){
             if(!Boolean.TRUE.equals(ward.getProvince().getTrangThai())){
                 //lấy tỉnh từ model province rồi lấy
@@ -94,9 +101,9 @@ public class Bai1Service {
     public void addProvince(Province p) {
         //tìm trong csdl xm có dữ liệu nào có mã tỉnh nào trùng vs cái của mik chọn ko
         //nếu có thì sẽ lấy dữ liệu của tất cả các cột của dữ liệu đó và lưu vào biến exis
-        Province exist = repoProvince.findByMaTinhThanh(p.getMaTinhThanh());
+        Province exist = repoProvince.findByMaTinhThanhAndTrangThaiTrue(p.getMaTinhThanh());
         if(exist != null){
-            throw new RuntimeException("Mã tỉnh thành này đã tồn tại");
+            throw new RuntimeException("Mã tỉnh thành này đã tồn tại và đang đc sử dụng");
         }
 
         //mặc định khi thêm trạng thái sẽ là 1 = true
@@ -129,9 +136,9 @@ public class Bai1Service {
     public void addWard(Ward w) {
         //tìm trong csdl xm có dữ liệu nào có mã phường nào trùng vs cái của mik nhập ko
         //nếu có thì sẽ lấy dữ liệu của tất cả các cột của dữ liệu đó và lưu vào biến exis
-        Ward exist = repoWard.findByMaPhuong(w.getMaPhuong());
+        Ward exist = repoWard.findByMaPhuongAndTrangThaiTrue(w.getMaPhuong());
         if(exist != null){
-            throw new RuntimeException("Mã phường này đã tồn tại");
+            throw new RuntimeException("Mã phường này đã tồn tại và đang đc sử dụng");
         }
 
         //nếu cbb chx đc chọn tỉnh thì báo lỗi
