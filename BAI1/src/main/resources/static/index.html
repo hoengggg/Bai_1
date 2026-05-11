@@ -17,8 +17,8 @@
     <br>
     Tên tỉnh <input type="text" id="tenTinh" required>
     <br>
-    <button type="submit">Thêm tỉnh</button>
-    <button type="button" onclick="suaProvince()">Sửa tỉnh</button>
+    <button type="submit" id="addProvince">Thêm tỉnh</button>
+    <button type="button" onclick="suaProvince()" id="suaTinhThanh">Sửa tỉnh</button>
 </form>
 <br>
 <table border="1" id="table-tinh">
@@ -51,8 +51,8 @@
     Tên tỉnh thành
     <select id="select-province" required></select>
     <br>
-    <button type="submit">Thêm xã phường</button>
-    <button type="button" onclick="suaWard()">Sửa xã phường</button>
+    <button type="submit" id="addWard">Thêm xã phường</button>
+    <button type="button" onclick="suaWard()" id="updateWard">Sửa xã phường</button>
 </form>
 <br>
 <table border="1" id="table-xa">
@@ -376,6 +376,7 @@
             //sau khi làm xog thì cập nhật lại bằng cách chạy lại các hàm
             loadTinh();
             loadXa();  //để khi cập nhật tỉnh thì bảng xã cũng đc cập nhật
+            loadProvinceToSelect(); //chạy lại hàm này để cập nhật cbb khi sửa tỉnh mới
 
             document.getElementById("form-province").reset();  //reset lại form
             document.getElementById("idProvince").value = ""; //để cho ô input id bị trống để có thể thêm nếu cần

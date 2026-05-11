@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProvinceRepository extends JpaRepository<Province, Integer> {
-    //phục vụ việc ko cho nhập mã tỉnh đã tồn tại (chức năng sửa)
-    Province findByMaTinhThanh(String maTinh);
+//    //phục vụ việc ko cho nhập mã tỉnh đã tồn tại (chức năng sửa)
+//    Province findByMaTinhThanh(String maTinh);
 
+    //phục vụ chức năng add
     Province findByMaTinhThanhAndTrangThaiTrue(String maTinh);
 
     //phục vụ hiển thị những dữ liệu có trạng thái = true

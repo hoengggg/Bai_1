@@ -117,7 +117,7 @@ public class Bai1Service {
 
         //tìm trong csdl xm có dữ liệu nào có mã tỉnh nào trùng vs cái của mik chọn ko
         //nếu có thì sẽ lấy dữ liệu của tất cả các cột của dữ liệu đó và lưu vào biến exist
-        Province exist = repoProvince.findByMaTinhThanh(p.getMaTinhThanh());
+        Province exist = repoProvince.findByMaTinhThanhAndTrangThaiTrue(p.getMaTinhThanh());
 
         //sau đó kiểm tra xem có tìm thấy ko, nếu có thì so sánh id của cái dữ liệu tìm đc đó vs id của cái mik đang định
         //sửa nếu trùng thì cho sửa còn ko hoặc ko thỏa mãn 1 trong 2 điều kiện hoặc cả 2 thì lỗi
@@ -173,7 +173,7 @@ public class Bai1Service {
         Ward existing = repoWard.findById(w.getId()).orElse(null);
 
         //kiểm tra xem trong db mã phường mới nhập vào đã tồn tại chưa, nếu có rồi thì lưu vào biến exist
-        Ward exist = repoWard.findByMaPhuong(w.getMaPhuong());
+        Ward exist = repoWard.findByMaPhuongAndTrangThaiTrue(w.getMaPhuong());
 
         //nếu != null tức là đã tìm đc và đc lưu vào exist thì sẽ báo là mã phường đã tồn tại
         if(exist != null && exist.getId() != w.getId()){
