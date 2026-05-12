@@ -4,7 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,14 +17,19 @@ import java.time.Duration;
 public class TestCrud {
     WebDriver webDriver;
 
-    @BeforeClass
+    @BeforeClass //chạy một lần trước khi chạy các hàm test bên dưới giúp mở trình duyệt
+    //beforeclass thì sẽ mở 1 lần và dùng chung giao diện cho tất cả các hàm test còn
+    //beforemethod thì cứ mỗi 1 hàm test là 1 lần mở giao diện riêng
     public void setUp(){
         // 1. Phải setup driver TRƯỚC
+        //tự động tải xuống và cấu hình, nó sẽ tự check phiên bản chrome trên máy và tải driver phù hợp về
         io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
 
         // 2. Sau đó mới khởi tạo trình duyệt
+        //khởi tạo 1 cửa sổ trình duyện chrome mới, chắc là để mở cửa sổ
         webDriver = new ChromeDriver();
-        webDriver.manage().window().maximize();
+        webDriver.manage().window().maximize();   //phóng to cửa số đấy lơn hết cỡ
+
         //webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));  //tgian timeout cho toàn bộ code trong file
         //chỉ cần là có gọi đến webDriver là sẽ vậy
 
@@ -45,7 +52,8 @@ public class TestCrud {
             webDriver.switchTo().alert().accept();
             System.out.println("Đã đóng Alert thành công!");
         } catch (Exception e) {
-            System.out.println("Không thấy Alert hoặc có lỗi khi đóng Alert.");
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
         }
 
         //phân trang tìm đến khi thấy dòng có nội dung giống trong nội dung của tenTinhMoi
@@ -87,7 +95,8 @@ public class TestCrud {
             webDriver.switchTo().alert().accept();
             System.out.println("Đã đóng Alert thành công!");
         } catch (Exception e) {
-            System.out.println("Không thấy Alert hoặc có lỗi khi đóng Alert.");
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
         }
 
         Thread.sleep(2000);
@@ -117,6 +126,7 @@ public class TestCrud {
         String tenXaPhuongMoi = "auto test";
         webDriver.findElement(By.cssSelector("#maPhuong")).sendKeys("AT");
         webDriver.findElement(By.cssSelector("#tenPhuong")).sendKeys(tenXaPhuongMoi);
+        //cách 1 để chọn trong cbb
         webDriver.findElement(By.xpath("//option[text()='Tinh moi moi']")).click();
         webDriver.findElement(By.cssSelector("#addWard")).click();
 
@@ -129,7 +139,8 @@ public class TestCrud {
             webDriver.switchTo().alert().accept();
             System.out.println("Đã đóng Alert thành công!");
         } catch (Exception e) {
-            System.out.println("Không thấy Alert hoặc có lỗi khi đóng Alert.");
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
         }
 
         boolean foundAddWard = false;
@@ -220,6 +231,89 @@ public class TestCrud {
         WebElement btnDeleteProvince = webDriver.findElement(By.xpath("//table[@id='table-tinh']//td[text()='" + tenTinhUpdate + "']/following-sibling::td/button[text()='Xóa']"));
         btnDeleteProvince.click();
         Thread.sleep(600);
+    }
+
+    @Test
+    public void TestExist() throws InterruptedException{
+        webDriver.findElement(By.cssSelector("#maTinh")).sendKeys("TPHCM");
+        webDriver.findElement(By.cssSelector("#tenTinh")).sendKeys("Ho Chi Minh City");
+        webDriver.findElement(By.cssSelector("#addProvince")).click();
+
+        try {
+            Thread.sleep(1000);
+            // Chấp nhận Alert (Nhấn OK)
+            webDriver.switchTo().alert().accept();
+            System.out.println("Da don alert!");
+        } catch (Exception e) {
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
+        }
+
+
+        Thread.sleep(2000);
+
+        //Xem chi tiết
+        WebElement btnDetailProvince = webDriver.findElement(By.xpath("//table[@id='table-tinh']//td[text()='Thành phố Hải Phòng']/following-sibling::td/button[text()='Xem']"));
+        btnDetailProvince.click();
+        Thread.sleep(2000);
+
+        webDriver.findElement(By.cssSelector("#maTinh")).clear();
+        webDriver.findElement(By.cssSelector("#maTinh")).sendKeys("TPHCM");
+        webDriver.findElement(By.cssSelector("#suaTinhThanh")).click();
+
+        try {
+            Thread.sleep(1000);
+            // Chấp nhận Alert (Nhấn OK)
+            webDriver.switchTo().alert().accept();
+            System.out.println("Da don alert!");
+        } catch (Exception e) {
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
+        }
+
+        Thread.sleep(3000);
+
+        webDriver.findElement(By.cssSelector("#maPhuong")).sendKeys("P_MYDINH");
+        webDriver.findElement(By.cssSelector("#tenPhuong")).sendKeys("My Dinh Ward");
+        //cách 2 để chọn trong cbb
+        WebElement cbb = webDriver.findElement(By.cssSelector("#select-province"));
+        Select select = new Select(cbb);  //select này chọn select của selenium
+
+        select.selectByVisibleText("Thành phố Hồ Chí Minh 2");
+
+        webDriver.findElement(By.cssSelector("#addWard")).click();
+
+        try {
+            Thread.sleep(1000);
+            // Chấp nhận Alert (Nhấn OK)
+            webDriver.switchTo().alert().accept();
+            System.out.println("Da don alert!");
+        } catch (Exception e) {
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
+        }
+
+
+        //Xem chi tiết
+        WebElement btnDetailWard = webDriver.findElement(By.xpath("//table[@id='table-xa']//td[text()='P_HANGTRONG']/following-sibling::td/button[text()='Xem']"));
+        btnDetailWard.click();
+        Thread.sleep(2000);
+
+        webDriver.findElement(By.cssSelector("#maPhuong")).clear();
+        webDriver.findElement(By.cssSelector("#maPhuong")).sendKeys("P_MYDINH");
+        webDriver.findElement(By.cssSelector("#updateWard")).click();
+
+        Thread.sleep(3000);
+
+        try {
+            Thread.sleep(1000);
+            // Chấp nhận Alert (Nhấn OK)
+            webDriver.switchTo().alert().accept();
+            System.out.println("Da don alert!");
+        } catch (Exception e) {
+            Assert.fail("ko dong dc alert hoac do alert ko xuat hien"); //chỉ cần ko đóng đc alert hoặc
+            //alert ko xuất hiện là sẽ báo lỗi
+        }
     }
 
     @AfterClass
